@@ -1,10 +1,14 @@
-const fs = require('fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { clientId, guildId, token } = require('./config.json');
+const { token } = require('./config.json');
+const fs = require('fs');
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
+
+// Place your client and guild ids here
+const clientId = '896422779912605766';
+const guildId = '659981758552342572';
 
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
@@ -13,7 +17,14 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '9' }).setToken(token);
 
-rest
-  .put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-  .then(() => console.log('성공적으로 명령어가 등록되었습니다'))
-  .catch(console.error);
+(async () => {
+  try {
+    console.log('Started refreshing application (/) commands.');
+
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
+
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error(error);
+  }
+})();
