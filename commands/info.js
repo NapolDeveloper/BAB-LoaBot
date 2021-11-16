@@ -1,4 +1,4 @@
-const { CommandInteraction } = require('discord.js');
+const { CommandInteraction, MessageEmbed } = require('discord.js');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -10,8 +10,10 @@ module.exports = {
    */
 
   async execute(interaction) {
-    console.log(getHtml());
-    await interaction.reply({ content: 'hello', ephemeral: true });
+    const gameInfo = getGameInfo();
+    console.log(gameInfo);
+
+    await interaction.reply({ content: 'ii', ephemeral: true });
   }
 };
 
@@ -23,4 +25,22 @@ const getHtml = async () => {
   } catch (error) {
     console.error(error);
   }
+};
+
+const getGameInfo = () => {
+  getHtml().then((html) => {
+    const $ = cheerio.load(html.data);
+    const gameInfoList = $('div.game-info').children('div');
+    let gameInfoData = [];
+    gameInfoList.each(function (i, element) {
+      gameInfoList[i] = {
+        title: $(this).find('span').first().text(),
+        des: $(this).find('span').last().text()
+      };
+      gameInfoData[i] = gameInfoList[i].title;
+    });
+    // embed 생성
+    console.log(gameInfoList);
+    return gameInfoList;
+  });
 };

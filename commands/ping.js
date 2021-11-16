@@ -1,6 +1,4 @@
-const { CommandInteraction } = require('discord.js');
-// at the top of your file
-const { MessageEmbed } = require('discord.js');
+const { CommandInteraction, MessageEmbed } = require('discord.js');
 
 // inside a command, event listener, etc.
 const exampleEmbed = new MessageEmbed()
