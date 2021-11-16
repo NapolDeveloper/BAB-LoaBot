@@ -15,7 +15,7 @@ for (const file of commandFiles) {
 }
 
 client.once('ready', async () => {
-  console.log('ready!');
+  console.log('[실행 성공]');
   // 길드를 지정해서 하면 커맨드가 바로 적용 되지만 모든 길드에서 사용하려면 약 1시간의 등록시간이 필요함
   await client.guilds.cache.get('659981758552342572')?.commands.set(data);
 });
@@ -27,7 +27,7 @@ client.on('interactionCreate', async (interaction) => {
   try {
     await command.execute(interaction);
   } catch (error) {
-    console.log('error');
+    console.error('[*에러 발생*]');
   }
 });
 
