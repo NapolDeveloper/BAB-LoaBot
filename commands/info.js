@@ -1,3 +1,8 @@
+/*
+- 원정대 레벨 가져와지는데 데이터 넘기면 사라지는 이슈
+
+*/
+
 const { CommandInteraction, MessageEmbed, Message } = require('discord.js');
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -10,7 +15,9 @@ let userInfo = {};
 
 // 원정대레벨, 전투레벨
 let userLevel = {};
-let a;
+
+// 장착레벨, 달성레벨
+let itemLevel = {};
 
 module.exports = {
   name: 'info',
@@ -45,26 +52,25 @@ module.exports = {
       // 원정대레벨, 전투레벨
       await getLevel(userName);
 
-      // console.log(gameInfo);
-      // console.log(userInfo);
-      console.log(a);
+      // 아이템 레벨 가져오기
+      await getItemLevel(userName);
 
+      console.log('데이터 가져오는중...');
       // 임베드 만들어주기
       const infoEmbed = new MessageEmbed()
         .setColor('#0099ff')
         // 가독성 좋게 변경해야함 --
-        .setTitle(`${userInfo.lv} ${userInfo.nickName} ${userInfo.server} `)
+        .setTitle(`${userInfo.lv} ${userInfo.nickName} ${userInfo.server}`)
         .setURL(`https://lostark.game.onstove.com/Profile/Character/${encodeURIComponent(userName)}`)
         .addFields(
-          // map으로 변경예정 --
-          // { name: '원정대레벨', value: userLevel.expeditionLevel },
-          // { name: '전투레벨', value: userLevel.battleLevel },
+          { name: '아이템레벨', value: itemLevel.itemLevelData },
           { name: gameInfo[0].title, value: gameInfo[0].des, inline: true },
           { name: gameInfo[1].title, value: gameInfo[1].des, inline: true },
           { name: gameInfo[2].title, value: gameInfo[2].des, inline: true },
           { name: gameInfo[3].title, value: gameInfo[3].des, inline: true }
         );
       await interaction.reply({ embeds: [infoEmbed], ephemeral: false });
+      console.log('데이터를 가져왔습니다');
     } catch (error) {
       console.log(error);
     }
@@ -104,6 +110,7 @@ const getGameProfile = async (username) => {
       const lv = $(this).find('span.profile-character-info__lv').text();
       const nickName = $(this).find('span.profile-character-info__name').text();
       const server = $(this).find('span.profile-character-info__server').text();
+      // console.log(`*${lv}*`);
 
       userInfo = { lv, nickName, server };
     });
@@ -118,15 +125,25 @@ const getLevel = async (username) => {
     const levelInfoList = $('div.level-info').children();
 
     levelInfoList.each(function () {
-      const expeditionLevel = $(this).find('div.level-info__expedition > span:nth-child(2)').text();
-      const battleLevel = $(this).find('div.level-info__item > span:nth-child(2)').text();
-
-      // console.log(battleLevel);
-      userLevel = { expeditionLevel, battleLevel };
-      a = expeditionLevel;
+      // const expeditionLevel = $(this).find('div.level-info__expedition > span:nth-child(2)').text();
+      // const battleLevel = $(this).find('div.level-info__item > span:nth-child(2)').text();
     });
   });
   return userLevel;
+};
+
+// 아이템레벨 가져오기 -- 아이템레벨 안넘겨짐
+const getItemLevel = async (username) => {
+  await getHtml(username).then((html) => {
+    const $ = cheerio.load(html.data);
+
+    const itemLevelList = $('div.level-info2__expedition');
+    itemLevelList.each(function () {
+      const itemLevelData = $(this).find('span').text();
+      itemLevel = { itemLevelData };
+    });
+  });
+  return itemLevel;
 };
 
 /* 캐릭터 리스트, 갯수 가져오는 코드
