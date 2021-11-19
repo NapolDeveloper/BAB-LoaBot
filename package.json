@@ -4,7 +4,7 @@
   "description": "BAB-LoaBot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +18,12 @@
   },
   "homepage": "https://github.com/NapolDeveloper/BAB-LoaBot#readme",
   "dependencies": {
-    "discord.js": "^13.2.0"
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
+    "discord-api-types": "^0.23.1",
+    "discord.js": "^13.2.0",
+    "dotenv": "^10.0.0"
   }
 }
