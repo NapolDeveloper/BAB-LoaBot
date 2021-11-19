@@ -20,12 +20,12 @@ let userLevel = {};
 let itemLevel = {};
 
 module.exports = {
-  name: 'info',
+  name: '정보',
   description: '사용자 정보 가져오기',
   options: [
     {
       name: 'username',
-      description: '해당 사용자 정보 가져오기',
+      description: '캐릭터 닉네임',
       type: 'STRING',
       require: true
     }
@@ -55,7 +55,7 @@ module.exports = {
       // 아이템 레벨 가져오기
       await getItemLevel(userName);
 
-      console.log('데이터 가져오는중...');
+      console.log('데이터를 가져오는중...');
       // 임베드 만들어주기
       const infoEmbed = new MessageEmbed()
         .setColor('#0099ff')
@@ -63,6 +63,7 @@ module.exports = {
         .setTitle(`${userInfo.lv} ${userInfo.nickName} ${userInfo.server}`)
         .setURL(`https://lostark.game.onstove.com/Profile/Character/${encodeURIComponent(userName)}`)
         .addFields(
+          { name: '원정대레벨', value: userLevel.expeditionLevel },
           { name: '아이템레벨', value: itemLevel.itemLevelData },
           { name: gameInfo[0].title, value: gameInfo[0].des, inline: true },
           { name: gameInfo[1].title, value: gameInfo[1].des, inline: true },
@@ -71,8 +72,10 @@ module.exports = {
         );
       await interaction.reply({ embeds: [infoEmbed], ephemeral: false });
       console.log('데이터를 가져왔습니다');
+      return;
     } catch (error) {
       console.log(error);
+      return;
     }
   }
 };
@@ -97,7 +100,6 @@ const getGameInfo = async (username) => {
       gameInfo[i] = { title: $(this).find('span').first().text(), des: $(this).find('span').last().text() };
     });
   });
-  return gameInfo;
 };
 
 // 전투레벨, 닉네임, 서버 가져오기
@@ -110,26 +112,23 @@ const getGameProfile = async (username) => {
       const lv = $(this).find('span.profile-character-info__lv').text();
       const nickName = $(this).find('span.profile-character-info__name').text();
       const server = $(this).find('span.profile-character-info__server').text();
-      // console.log(`*${lv}*`);
 
       userInfo = { lv, nickName, server };
     });
   });
-  return userInfo;
 };
 
 // 원정대레벨, 전투레벨 가져오기 -- 원정대레벨 데이터가 안넘어가는 현상 있음
 const getLevel = async (username) => {
   await getHtml(username).then((html) => {
     const $ = cheerio.load(html.data);
-    const levelInfoList = $('div.level-info').children();
+    const levelInfoList = $('div.level-info__expedition');
 
     levelInfoList.each(function () {
-      // const expeditionLevel = $(this).find('div.level-info__expedition > span:nth-child(2)').text();
-      // const battleLevel = $(this).find('div.level-info__item > span:nth-child(2)').text();
+      const expeditionLevel = $(this).find('span').text();
+      userLevel = { expeditionLevel };
     });
   });
-  return userLevel;
 };
 
 // 아이템레벨 가져오기 -- 아이템레벨 안넘겨짐
@@ -143,7 +142,6 @@ const getItemLevel = async (username) => {
       itemLevel = { itemLevelData };
     });
   });
-  return itemLevel;
 };
 
 /* 캐릭터 리스트, 갯수 가져오는 코드
